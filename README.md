@@ -7,6 +7,8 @@ Harmony is advanced a project on DDD.
 ### Entity
 
 ```scala
+package domain
+
 import jp.co.reraku.harmony.{ Identifier, Entity }
 import java.util.UUID
 
@@ -18,6 +20,8 @@ case class Person(id: PersonId, name: String) extends Entity[PersonId]
 ### Repository
 
 ```scala
+package domain
+
 import jp.co.reraku.harmony.{ Repository, PersistenceContext }
 
 trait PersonRepository[S, M[+_]] extends Repository[PersonId, Person, S, M] {
@@ -25,22 +29,23 @@ trait PersonRepository[S, M[+_]] extends Repository[PersonId, Person, S, M] {
 }
 ```
 
-### RequextContext (via HTTP)
+### RequextContext
 
 ```scala
-import jp.co.reraku.harmony.RequextContext
-import javax.servlet.http.HttpServletRequest
+package domain
 
-class ApiContext(request: HttpServletRequest) extends RequestContext {
-  def requireAuthenticationToken(): Option[String] = {
-    // ...
-  }
+import jp.co.reraku.harmony.RequextContext
+
+trait ApiRequestContext extends RequestContext {
+  def requireAuthenticationToken(): Option[String]
 }
 ```
 
 ### Command
 
 ```scala
+package domain
+
 import jp.co.reraku.harmony.Command
 
 case class RegisterPerson(id: PersonId, name: String) extends Command[RegisterPerson]
@@ -54,7 +59,9 @@ class RegisterPersonHandler() extends CommandHandler[ApiContext, RegisterPerson,
 
 ### Query
 
-```
+```scala
+package domain
+
 import jp.co.reraku.harmony.Query
 
 case class LookupPerson(id: PersonId) extends Query[LookupPerson]
@@ -68,9 +75,32 @@ class LookupPersonHandler() extends QueryHandler[ApiContext, LookupPerson, Optio
 
 ## Use Scalatra as a presentation layer
 
+### RequestContext
+
+```scala
+package presentation
+
+import domain._
+
+import javax.servlet.http.HttpServletRequest
+
+class ScalatraApiRequestContext(request: HttpServletRequest) extends ApiRequestContext {
+
+  // define the methods requested from the domain layer
+  def requireAuthenticationToken(): Option[String] = {
+    // ...
+  }
+
+}
+```
+
 ### Inbound
 
 ```scala
+package presentation
+
+import domain._
+
 import jp.co.reraku.harmony.scalatra.{ ScalatraInbound, ScalatraContextWrapper }
 
 object RegisterPersonInbound extends ScalatraInbound[ApiStack, RegisterPerson] {
@@ -83,6 +113,10 @@ object RegisterPersonInbound extends ScalatraInbound[ApiStack, RegisterPerson] {
 ### Outbound
 
 ```scala
+package presentation
+
+import domain._
+
 import jp.co.reraku.harmony.scalatra.ScalatraOutbound
 import org.scalatra._
 
@@ -100,26 +134,31 @@ object RegisterPersonOutbound extends ScalatraOutbound[RegisterPerson, Person] {
 ### Servlet
 
 ```scala
+import domain._
+import presentation._
+
 import jp.co.reraku.harmony.scalatra.HarmonySupport
 import org.scalatra._
 import org.scalatra.json._
 
-trait ApiStack extends ScalatraServlet with JacksonJsonSupport with HarmonySupport[ApiStack, ApiContext] {
-  def context(): ApiContext = new ApiContext(request)
+trait ApiStack extends ScalatraServlet with HarmonySupport[ApiStack, ApiRequestContext] {
+  def context(): ApiRequestContext = new ScalatraApiRequestContext(request)
 }
 
 class PersonEndpoint extends ApiStack {
-  // define inbounds and outbounds for implicit parameters
-  implicit val registerPersonOutbound = RegisterPersonOutbound
-  implicit val registerPersonInbound = RegisterPersonInbound
-  // ...
 
-  // define route: GET /people
+  // assignment inbounds and outbounds for implicit parameters
+  implicit val registerPersonInbound = RegisterPersonInbound
+  implicit val registerPersonOutbound = RegisterPersonOutbound
+  implicit val lookupPersonInbound = LookupPersonInbound
+  implicit val lookupPersonOutbound = LookupPersonOutbound
+
+  // define route: POST /people
   arrive("/people") handleWith {
     new RegisterPersonHandler()
   }
 
-  // define route: POST /people/:id
+  // define route: GET /people/:id
   arrive("/people/:id") handleWith {
     new LookupPersonHandler()
   }
@@ -132,6 +171,10 @@ class PersonEndpoint extends ApiStack {
 ### Repository
 
 ```scala
+package infrastructure
+
+import domain._
+
 import jp.co.reraku.harmony.PersistenceContext
 import scalikejdbc._
 import scala.util.Try
