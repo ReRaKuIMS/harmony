@@ -2,6 +2,7 @@ import sbt._
 import sbt.Keys._
 import com.typesafe.sbt.SbtScalariform._
 import com.typesafe.sbt.SbtScalariform.ScalariformKeys._
+import com.typesafe.sbt.pgp.PgpKeys._
 
 object HarmonyBuild extends Build {
   import scalariform.formatter.preferences._
@@ -10,7 +11,8 @@ object HarmonyBuild extends Build {
     organization := "jp.co.reraku",
     scalaVersion := "2.11.8",
     scalacOptions ++= Seq("-target:jvm-1.7", "-unchecked", "-deprecation", "-Yinline-warnings", "-Xcheckinit", "-encoding", "utf8", "-feature"),
-    scalacOptions ++= Seq("-language:higherKinds", "-language:postfixOps", "-language:implicitConversions")
+    scalacOptions ++= Seq("-language:higherKinds", "-language:postfixOps", "-language:implicitConversions"),
+    publishTo := Some(Resolver.file("file", file(".")))
   ) ++ scalariformSettings ++ Seq(
     preferences := preferences.value
       .setPreference(AlignParameters, true)
@@ -22,7 +24,7 @@ object HarmonyBuild extends Build {
   lazy val harmonyProject = Project(
     id = "harmony-project",
     base = file("."),
-    settings = harmonySettings ++ Seq(
+    settings = harmonySettings ++ doNotPublish ++ Seq(
       description := "Harmony is advanced a project by DDD"
     )
   ) aggregate(harmonyCore, harmonyScalatra, harmonyScalikejdbc)
@@ -60,4 +62,11 @@ object HarmonyBuild extends Build {
       )
     )
   ) dependsOn(harmonyCore % "compile;test->test;provided->provided")
+
+  lazy val doNotPublish = Seq(
+    publish := {},
+    publishLocal := {},
+    publishSigned := {},
+    publishLocalSigned := {}
+  )
 }
