@@ -6,6 +6,12 @@ trait Repository[ID <: Identifier[_], E <: Entity[ID], X, M[+_]] {
   def store(entity: E)(implicit context: X): M[E]
 }
 
+trait RepositoryContextProvider[X] {
+  def read[A](process: X => A): A
+
+  def write[A](process: X => A): A
+}
+
 class RepositoryException(message: String) extends Exception(message)
 
 class EntityNotFoundException(message: String) extends RepositoryException(message)
