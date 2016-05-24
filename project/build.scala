@@ -9,6 +9,7 @@ object HarmonyBuild extends Build {
 
   lazy val harmonySettings = Seq(
     organization := "jp.co.reraku",
+    version := "0.1.0",
     scalaVersion := "2.11.8",
     scalacOptions ++= Seq("-target:jvm-1.7", "-unchecked", "-deprecation", "-Yinline-warnings", "-Xcheckinit", "-encoding", "utf8", "-feature"),
     scalacOptions ++= Seq("-language:higherKinds", "-language:postfixOps", "-language:implicitConversions"),
