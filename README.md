@@ -22,10 +22,10 @@ case class Person(id: PersonId, name: String) extends Entity[PersonId]
 ```scala
 package domain
 
-import jp.co.reraku.harmony.{ Repository, PersistenceContext }
+import jp.co.reraku.harmony.Repository
 
-trait PersonRepository[S, M[+_]] extends Repository[PersonId, Person, S, M] {
-  def findByName(name: String)(implicit PersistenceContext[S]): M[Person]
+trait PersonRepository[X, M[+_]] extends Repository[PersonId, Person, X, M] {
+  def findByName(name: String)(implicit X): M[Person]
 }
 ```
 
@@ -175,23 +175,22 @@ package infrastructure
 
 import domain._
 
-import jp.co.reraku.harmony.PersistenceContext
 import scalikejdbc._
 import scala.util.Try
 
 class ScalikejdbcPersonRepository extends PersonRepository[DBSession, Try] {
 
   // define the methods requested from Repository
-  def resolve(id: PersonId)(implicit context: PersistenceContext[DBSession]): Try[Person] = {
+  def resolve(id: PersonId)(implicit context: DBSession): Try[Person] = {
     // ...
   }
 
-  def store(person: Person)(implicit context: PersistenceContext[DBSession]): Person = {
+  def store(person: Person)(implicit context: DBSession): Person = {
     // ...
   }
 
   // define the methods requested from the domain layer
-  def findByName(name: String)(implicit context: PersistenceContext[DBSession]): Try[Person] = {
+  def findByName(name: String)(implicit context: DBSession): Try[Person] = {
     // ...
   }
 
