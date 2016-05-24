@@ -1,7 +1,7 @@
 package jp.co.reraku.harmony
 
-trait PersistenceContext[S] {
-  def read[A](process: S => A): A
+trait PersistenceContext[X] {
+  def read[A](process: X => A): A
 
-  def write[A](process: S => A): A
+  def write[A](process: X => A): A
 }
