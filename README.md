@@ -165,34 +165,3 @@ class PersonEndpoint extends ApiStack {
 
 }
 ```
-
-## Use ScalikeJDBC as an infrastructure layer
-
-### Repository
-
-```scala
-package infrastructure
-
-import domain._
-
-import scalikejdbc._
-import scala.util.Try
-
-class ScalikejdbcPersonRepository extends PersonRepository[DBSession, Try] {
-
-  // define the methods requested from Repository
-  def resolve(id: PersonId)(implicit context: DBSession): Try[Person] = {
-    // ...
-  }
-
-  def store(person: Person)(implicit context: DBSession): Person = {
-    // ...
-  }
-
-  // define the methods requested from the domain layer
-  def findByName(name: String)(implicit context: DBSession): Try[Person] = {
-    // ...
-  }
-
-}
-```

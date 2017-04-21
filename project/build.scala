@@ -28,7 +28,7 @@ object HarmonyBuild extends Build {
     settings = harmonySettings ++ doNotPublish ++ Seq(
       description := "Harmony is advanced a project by DDD"
     )
-  ) aggregate(harmonyCore, harmonyScalatra, harmonyScalikejdbc)
+  ) aggregate(harmonyCore, harmonyScalatra)
 
   lazy val harmonyCore = Project(
     id = "harmony",
@@ -49,17 +49,6 @@ object HarmonyBuild extends Build {
         "javax.servlet" %  "javax.servlet-api" % "3.1.0",
         "org.scalatra"  %% "scalatra"          % ScalatraVersion,
         "org.scalatra"  %% "scalatra-json"     % ScalatraVersion
-      )
-    )
-  ) dependsOn(harmonyCore % "compile;test->test;provided->provided")
-
-  lazy val harmonyScalikejdbc = Project(
-    id = "harmony-scalikejdbc",
-    base = file("scalikejdbc"),
-    settings = harmonySettings ++ Seq(
-      description := "ScalikeJDBC support as an infrastructure layer",
-      libraryDependencies ++= Seq(
-        "org.scalikejdbc" %% "scalikejdbc" % "2.3.5"
       )
     )
   ) dependsOn(harmonyCore % "compile;test->test;provided->provided")
