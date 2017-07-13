@@ -10,9 +10,21 @@ object HarmonyBuild extends Build {
   lazy val harmonySettings = Seq(
     organization := "jp.co.reraku",
     version := "0.2.1",
-    scalaVersion := "2.11.8",
-    scalacOptions ++= Seq("-target:jvm-1.7", "-unchecked", "-deprecation", "-Yinline-warnings", "-Xcheckinit", "-encoding", "utf8", "-feature"),
-    scalacOptions ++= Seq("-language:higherKinds", "-language:postfixOps", "-language:implicitConversions"),
+    crossScalaVersions := Seq("2.12.2", "2.11.8"),
+    scalaVersion := crossScalaVersions.value.head,
+    scalacOptions ++= Seq(
+      "-target:jvm-1.8",
+      "-unchecked",
+      "-deprecation",
+      "-Xcheckinit",
+      "-encoding",
+      "utf8",
+      "-feature",
+      "-Ywarn-unused-import",
+      "-language:higherKinds",
+      "-language:postfixOps",
+      "-language:implicitConversions"
+    ),
     publishTo := Some(Resolver.file("file", file(".")))
   ) ++ scalariformSettings ++ Seq(
     preferences := preferences.value
@@ -38,7 +50,7 @@ object HarmonyBuild extends Build {
     )
   )
 
-  val ScalatraVersion = "2.4.0"
+  val ScalatraVersion = "2.5.1"
 
   lazy val harmonyScalatra = Project(
     id = "harmony-scalatra",
